@@ -1,0 +1,287 @@
+# 📋 Sistem Absensi PKL (Praktik Kerja Lapangan)
+
+> Sistem manajemen absensi terintegrasi untuk Program Kerja Lapangan dengan fitur foto bukti, lokasi GPS akurat, dan monitoring pembina.
+
+## 🌟 Fitur Utama
+
+- 📸 **Upload Foto Bukti** - Peserta dapat upload foto saat masuk dan keluar
+- 📍 **GPS Location Tracking** - Pencatatan koordinat lokasi otomatis untuk verifikasi
+- 👁️ **Monitoring Pembina** - Pembina dapat memantau kehadiran semua peserta binaan
+- 📊 **Dashboard Analytics** - Dashboard untuk 3 role berbeda (Admin, Pembina, Peserta)
+- ✅ **CRUD Lengkap** - Manajemen data pembina, peserta, dan absensi
+- 🔐 **Role-Based Access** - Sistem security dengan 3 role berbeda
+- 🎨 **UI/UX Responsive** - Interface yang user-friendly dan mobile-friendly
+
+## 📚 Dokumentasi
+
+Dokumentasi lengkap tersedia dalam beberapa file:
+
+| File | Deskripsi | Waktu Baca |
+|------|-----------|-----------|
+| **[INDEX.md](INDEX.md)** | 🎯 Start here - Index & navigasi | 5 min |
+| **[QUICK_START.md](QUICK_START.md)** | 🚀 Setup dalam 5 menit | 10 min |
+| **[DOKUMENTASI.md](DOKUMENTASI.md)** | 📖 Panduan lengkap & komprehensif | 30 min |
+| **[ERD.md](ERD.md)** | 🗄️ Entity Relationship Diagram | 20 min |
+| **[CRUD_GUIDE.md](CRUD_GUIDE.md)** | 🔄 Detail semua CRUD operation | 35 min |
+| **[CHANGELOG.md](CHANGELOG.md)** | 📝 Version history & roadmap | 10 min |
+
+## 🚀 Quick Start
+
+### 1️⃣ Setup Database
+```bash
+# Buat database MySQL
+mysql -u root -p
+CREATE DATABASE absensi_pkl;
+EXIT;
+```
+
+### 2️⃣ Configure Environment
+Edit file `.env`:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=absensi_pkl
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+### 3️⃣ Install & Run
+```bash
+# Install dependencies
+composer install
+npm install
+
+# Generate key
+php artisan key:generate
+
+# Migrate database
+php artisan migrate
+
+# Link storage
+php artisan storage:link
+
+# Build assets
+npm run build
+
+# Run server
+php artisan serve
+```
+
+**Aplikasi ready di**: http://localhost:8000
+
+## 👥 User Roles
+
+### 👤 PESERTA
+- Input absensi dengan foto & GPS
+- Lihat riwayat absensi pribadi
+- Dashboard statistik kehadiran
+
+### 👨‍💼 PEMBINA
+- Monitor peserta binaan
+- Verifikasi absensi
+- Dashboard monitoring
+
+### 🔑 ADMIN
+- Kelola data pembina (CRUD)
+- Kelola data peserta (CRUD)
+- Lihat statistik keseluruhan
+
+## 🗄️ Database Schema
+
+Sistem menggunakan 4 tabel utama:
+
+```
+USERS → PEMBINAS → PESERTAS → ATTENDANCES
+(1:1)   (1:N)     (1:N)      (with photos & GPS)
+```
+
+Lihat **[ERD.md](ERD.md)** untuk diagram lengkap.
+
+## 📁 Project Structure
+
+```
+absensi-pkl/
+├── app/Http/Controllers/      ← 5 controllers
+├── app/Models/                ← 4 models
+├── database/migrations/       ← 4 migrations
+├── resources/views/           ← 18 blade views
+├── routes/web.php            ← 25+ routes
+├── storage/app/public/       ← Upload files
+└── 📚 Dokumentasi files...
+```
+
+## 🔧 Tech Stack
+
+- **Backend**: Laravel 12.0 + PHP 8.2
+- **Database**: MySQL 8.0
+- **Frontend**: Bootstrap 5.3 + Font Awesome 6.4
+- **Build Tool**: Vite
+- **Storage**: Local storage (photos)
+
+## ✨ Fitur CRUD
+
+### Pembina Management (Admin)
+- ✅ Create pembina baru
+- ✅ Read daftar pembina
+- ✅ Update data pembina
+- ✅ Delete pembina (cascade)
+
+### Peserta Management (Admin)
+- ✅ Create peserta baru
+- ✅ Read daftar peserta
+- ✅ Update data peserta
+- ✅ Delete peserta (cascade)
+
+### Attendance Management (All Roles)
+- ✅ Create absensi + foto + GPS
+- ✅ Read dengan role-based filter
+- ✅ Update absensi & foto
+- ✅ Delete dengan akses control
+
+## 🔐 Security Features
+
+- ✅ Password hashing (bcrypt)
+- ✅ CSRF protection
+- ✅ Input validation
+- ✅ File upload validation
+- ✅ Role-based authorization
+- ✅ Cascade delete constraints
+- ✅ Session management
+
+## 📋 Routes Reference
+
+```
+# Public
+GET  /                    → Homepage
+GET  /login              → Login form
+GET  /register           → Register form
+
+# Auth Required
+GET  /dashboard          → Dashboard (role-based)
+GET  /logout             → Logout
+
+# Pembina Management (Admin)
+GET    /pembina          → Daftar pembina
+POST   /pembina          → Create pembina
+GET    /pembina/{id}     → Detail pembina
+PUT    /pembina/{id}     → Update pembina
+DELETE /pembina/{id}     → Delete pembina
+
+# Peserta Management (Admin)
+GET    /peserta          → Daftar peserta
+POST   /peserta          → Create peserta
+GET    /peserta/{id}     → Detail peserta
+PUT    /peserta/{id}     → Update peserta
+DELETE /peserta/{id}     → Delete peserta
+
+# Attendance (All Auth Users)
+GET    /attendance       → Daftar absensi
+POST   /attendance       → Create absensi
+GET    /attendance/{id}  → Detail absensi
+PUT    /attendance/{id}  → Update absensi
+DELETE /attendance/{id}  → Delete absensi
+```
+
+## 🧪 Test Account
+
+Setelah setup, gunakan akun ini:
+
+```
+Admin:
+  Email: admin@example.com
+  Password: password123
+
+Pembina:
+  Email: pembina@example.com
+  Password: password123
+
+Peserta:
+  Daftar sendiri atau gunakan:
+  Email: peserta@example.com
+  Password: password123
+```
+
+## 📖 How to Use
+
+1. **Baca INDEX.md** untuk navigasi dokumentasi
+2. **Ikuti QUICK_START.md** untuk setup
+3. **Baca DOKUMENTASI.md** untuk pemahaman mendalam
+4. **Referensi ERD.md** untuk struktur database
+5. **Check CRUD_GUIDE.md** untuk detail operasi
+
+## 🐛 Troubleshooting
+
+### Database connection error?
+```bash
+# Check .env configuration
+# Ensure database exists
+php artisan migrate
+```
+
+### File not found?
+```bash
+php artisan storage:link
+chmod -R 755 storage/
+```
+
+### Port 8000 already used?
+```bash
+php artisan serve --port=8001
+```
+
+Lihat **QUICK_START.md** untuk troubleshooting lebih lanjut.
+
+## 📊 Statistics
+
+- **5** Controllers
+- **4** Models
+- **18** Blade Views
+- **4** Database Tables
+- **25+** Routes
+- **50+** Total Files
+
+## 🚀 Fitur Bonus (Dapat Dikembangkan)
+
+- 📊 Export ke PDF/Excel
+- 📧 Email notifications
+- 🔌 REST API
+- 🎫 QR Code attendance
+- 📱 Mobile app
+- ⚡ Real-time monitoring
+- 🤖 Face recognition
+
+## 📝 Documentation Files
+
+Semua dokumentasi tersedia dalam format Markdown:
+
+- **INDEX.md** - Index & navigation guide
+- **QUICK_START.md** - 5-minute setup
+- **DOKUMENTASI.md** - Comprehensive guide
+- **ERD.md** - Database schema
+- **CRUD_GUIDE.md** - CRUD details
+- **CHANGELOG.md** - Version history
+- **README.md** - This file
+
+## 📞 Support
+
+**Untuk bantuan:**
+1. Check troubleshooting di QUICK_START.md
+2. Review documentations
+3. Check Laravel logs: `storage/logs/laravel.log`
+4. Clear cache: `php artisan cache:clear`
+
+## 📄 License
+
+MIT License - Free to use and modify
+
+## 🎉 Getting Started
+
+→ **Mulai dari sini: [INDEX.md](INDEX.md)**
+
+---
+
+**Dibuat dengan ❤️ menggunakan Laravel 12 & Bootstrap 5**
+
+*Last Updated: 27 November 2025*
+*Version: 1.0.0*
