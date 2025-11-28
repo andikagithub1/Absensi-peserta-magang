@@ -295,6 +295,10 @@ php artisan migrate
 # Link storage
 php artisan storage:link
 
+# Jalankan Seeder
+php artisan db:seed --class=DatabaseSeeder
+
+
 # Build assets
 npm run build
 
@@ -431,24 +435,6 @@ PUT    /attendance/{id}  → Update absensi
 DELETE /attendance/{id}  → Delete absensi
 ```
 
-## 🧪 Test Account
-
-Setelah setup, gunakan akun ini:
-
-```
-Admin:
-  Email: admin@example.com
-  Password: password123
-
-Pembina:
-  Email: pembina@example.com
-  Password: password123
-
-Peserta:
-  Daftar sendiri atau gunakan:
-  Email: peserta@example.com
-  Password: password123
-```
 
 ## 📖 How to Use
 
