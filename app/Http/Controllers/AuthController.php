@@ -20,6 +20,7 @@ class AuthController extends Controller
 
         if (auth()->attempt($credentials)) {
             $request->session()->regenerate();
+
             return redirect()->intended('/dashboard')->with('success', 'Login berhasil');
         }
 
@@ -33,7 +34,7 @@ class AuthController extends Controller
         auth()->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
+
         return redirect('/')
             ->with('success', 'Logout berhasil')
             ->header('Cache-Control', 'no-cache, no-store, must-revalidate, private')
@@ -43,7 +44,9 @@ class AuthController extends Controller
 
     public function register()
     {
-        return view('auth.register');
+        $pembinas = \App\Models\Pembina::all();
+
+        return view('auth.register', compact('pembinas'));
     }
 
     public function store(Request $request)
@@ -63,6 +66,7 @@ class AuthController extends Controller
             'jurusan' => 'nullable|required_if:role,peserta|string',
             'tanggal_mulai' => 'nullable|required_if:role,peserta|date',
             'tanggal_selesai' => 'nullable|required_if:role,peserta|date|after:tanggal_mulai',
+            'pembina_id' => 'nullable|required_if:role,peserta|exists:pembinas,id',
         ]);
 
         // Create user
@@ -70,6 +74,7 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
+            'plain_password' => $validated['password'],
             'role' => $validated['role'],
         ]);
 
@@ -85,7 +90,7 @@ class AuthController extends Controller
         } elseif ($validated['role'] === 'peserta') {
             \App\Models\Peserta::create([
                 'user_id' => $user->id,
-                'pembina_id' => null, // Admin akan assign pembina nanti
+                'pembina_id' => $validated['pembina_id'] ?? null,
                 'nisn' => $validated['nisn'],
                 'nama_lengkap' => $validated['name'],
                 'sekolah' => $validated['sekolah'],
@@ -97,6 +102,7 @@ class AuthController extends Controller
         }
 
         auth()->login($user);
+
         return redirect('/dashboard')->with('success', 'Registrasi berhasil');
     }
 }

@@ -11,16 +11,22 @@ class PreventBackHistory
     /**
      * Handle an incoming request.
      * Prevent browser back button from showing cached pages.
-     * Used for protected pages that shouldn't be accessible via back button.
+     * Adds cache control and security headers to protect sensitive authenticated pages.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
 
-        // Only add no-cache headers, don't invalidate session
+        // Prevent browser caching of authenticated pages
+        // This ensures sensitive data isn't cached and back button can't access old pages
         return $response
-            ->header('Cache-Control', 'no-cache, no-store, must-revalidate, private')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate, private, max-age=0')
             ->header('Pragma', 'no-cache')
-            ->header('Expires', '0');
+            ->header('Expires', '0')
+            ->header('X-Content-Type-Options', 'nosniff')
+            ->header('X-Frame-Options', 'DENY')
+            ->header('X-XSS-Protection', '1; mode=block');
     }
 }

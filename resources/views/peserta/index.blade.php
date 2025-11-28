@@ -65,6 +65,9 @@
                                             <a href="{{ route('peserta.edit', $peserta->id) }}" class="btn btn-warning" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            <a href="{{ route('peserta.edit-password', $peserta->id) }}" class="btn btn-secondary" title="Ubah Password">
+                                                <i class="fas fa-key"></i>
+                                            </a>
                                             <form action="{{ route('peserta.destroy', $peserta->id) }}" method="POST" style="display: inline;">
                                                 @csrf
                                                 @method('DELETE')
@@ -125,6 +128,9 @@
                                     </a>
                                     <a href="{{ route('peserta.edit', $peserta->id) }}" class="btn btn-sm btn-warning">
                                         <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="{{ route('peserta.edit-password', $peserta->id) }}" class="btn btn-sm btn-secondary">
+                                        <i class="fas fa-key"></i> Ubah Password
                                     </a>
                                     <form action="{{ route('peserta.destroy', $peserta->id) }}" method="POST">
                                         @csrf

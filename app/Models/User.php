@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Crypt;
 
 class User extends Authenticatable
 {
@@ -21,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'plain_password',
+        'encrypted_password',
         'role',
     ];
 
@@ -31,6 +34,8 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
+        'plain_password',
+        'encrypted_password',
         'remember_token',
     ];
 
@@ -45,6 +50,32 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Mutator untuk plain_password - encrypt sebelum disimpan
+     */
+    public function setPlainPasswordAttribute(?string $value): void
+    {
+        if ($value) {
+            $this->attributes['encrypted_password'] = Crypt::encryptString($value);
+        }
+    }
+
+    /**
+     * Accessor untuk plain_password - decrypt saat diambil
+     */
+    public function getPlainPasswordAttribute(): ?string
+    {
+        if ($this->attributes['encrypted_password'] ?? null) {
+            try {
+                return Crypt::decryptString($this->attributes['encrypted_password']);
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+
+        return null;
     }
 
     public function pembina()

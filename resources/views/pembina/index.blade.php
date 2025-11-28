@@ -51,6 +51,9 @@
                                             <a href="{{ route('pembina.edit', $pembina->id) }}" class="btn btn-warning" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            <a href="{{ route('pembina.edit-password', $pembina->id) }}" class="btn btn-secondary" title="Ubah Password">
+                                                <i class="fas fa-key"></i>
+                                            </a>
                                             <form action="{{ route('pembina.destroy', $pembina->id) }}" method="POST" style="display: inline;">
                                                 @csrf
                                                 @method('DELETE')
@@ -97,6 +100,9 @@
                                     </a>
                                     <a href="{{ route('pembina.edit', $pembina->id) }}" class="btn btn-sm btn-warning">
                                         <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="{{ route('pembina.edit-password', $pembina->id) }}" class="btn btn-sm btn-secondary">
+                                        <i class="fas fa-key"></i> Ubah Password
                                     </a>
                                     <form action="{{ route('pembina.destroy', $pembina->id) }}" method="POST">
                                         @csrf

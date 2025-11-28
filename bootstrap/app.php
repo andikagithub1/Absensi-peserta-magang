@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'peserta' => \App\Http\Middleware\PesertaRole::class,
             'guest' => \App\Http\Middleware\IsGuest::class,
             'prevent.back' => \App\Http\Middleware\PreventBackHistory::class,
+            'check.admin.access' => \App\Http\Middleware\CheckAdminAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

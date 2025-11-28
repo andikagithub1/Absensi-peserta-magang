@@ -75,6 +75,28 @@
             </div>
         </div>
     </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-pen-fancy"></i> Tanda Tangan
+                </div>
+                <div class="card-body">
+                    @if($attendance->tanda_tangan)
+                        <img src="{{ $attendance->tanda_tangan }}" alt="Tanda Tangan" style="max-width: 100%; height: auto; max-height: 300px; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                        <small class="text-muted d-block mt-2">
+                            <i class="fas fa-check-circle text-success"></i> Ditandatangani oleh peserta
+                        </small>
+                    @else
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-circle"></i> Belum ada tanda tangan.
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div class="mt-4">
         <a href="{{ route('attendance.edit', $attendance) }}" class="btn btn-warning">

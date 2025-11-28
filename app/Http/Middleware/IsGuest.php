@@ -11,20 +11,19 @@ class IsGuest
     /**
      * Handle an incoming request.
      * Prevent authenticated users from accessing auth pages (login/register).
-     * Add no-cache headers to prevent back button access.
+     * This extends Laravel's built-in guest middleware with custom messaging.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         if (auth()->check()) {
-            return redirect('/dashboard');
+            // Authenticated users attempting to access auth pages
+            // Redirect them to dashboard
+            return redirect('/dashboard')
+                ->with('info', 'Anda sudah login. Silakan keluar terlebih dahulu untuk login dengan akun lain');
         }
 
-        $response = $next($request);
-
-        // Prevent caching to avoid back button showing auth pages
-        return $response
-            ->header('Cache-Control', 'no-cache, no-store, must-revalidate, private')
-            ->header('Pragma', 'no-cache')
-            ->header('Expires', '0');
+        return $next($request);
     }
 }

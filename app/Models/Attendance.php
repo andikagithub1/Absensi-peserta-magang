@@ -24,6 +24,7 @@ class Attendance extends Model
         'longitude_keluar',
         'status',
         'keterangan',
+        'tanda_tangan',
     ];
 
     protected function casts(): array

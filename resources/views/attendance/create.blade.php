@@ -198,6 +198,30 @@
                                 <small class="invalid-feedback">{{ $message }}</small>
                             @enderror
                         </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-pen-fancy"></i> Tanda Tangan
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div style="border: 2px solid #ddd; border-radius: 5px; padding: 10px; background: #fafafa;">
+                                <canvas id="signatureCanvas" width="400" height="200" 
+                                        style="border: 1px solid #ccc; border-radius: 3px; cursor: crosshair; display: block; width: 100%; background: white;">
+                                </canvas>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                <i class="fas fa-info-circle"></i> Tanda tangani di atas untuk verifikasi identitas
+                            </small>
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearSignature()">
+                                    <i class="fas fa-undo"></i> Hapus Tanda Tangan
+                                </button>
+                            </div>
+                            <input type="hidden" id="tanda_tangan" name="tanda_tangan">
+                            @error('tanda_tangan')
+                                <small class="text-danger d-block mt-2">{{ $message }}</small>
+                            @enderror
+                        </div>
                         
                         <div class="d-grid gap-2 d-sm-flex">
                             <a href="{{ route('attendance.index') }}" class="btn btn-secondary">
@@ -526,48 +550,74 @@ function startCameraMasuk() {
     
     console.log('🎥 Meminta akses kamera untuk masuk...');
     
-    const constraints = {
-        video: {
-            facingMode: 'user',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-        },
+    // Gunakan object constraints untuk compatibility yang lebih baik
+    let constraints = {
+        video: true,
         audio: false
     };
     
-    navigator.mediaDevices.getUserMedia(constraints)
-        .then(stream => {
-            console.log('✅ Kamera berhasil diakses (masuk)');
-            streamMasuk = stream;
-            video.srcObject = stream;
-            
-            // Tungup video siap dimainkan
-            video.onloadedmetadata = function() {
-                console.log('✅ Video metadata loaded');
-                video.play().catch(err => {
-                    console.error('❌ Error playing video:', err);
-                });
-            };
-            
-            video.style.display = 'block';
-            placeholder.style.display = 'none';
-            document.getElementById('capture_masuk_btn').style.display = 'inline-block';
-            document.getElementById('stop_masuk_btn').style.display = 'inline-block';
-        })
-        .catch(err => {
-            console.error('❌ Error mengakses kamera:', err);
-            let errorMsg = 'Tidak dapat mengakses kamera. ';
-            if (err.name === 'NotAllowedError') {
-                errorMsg += 'Izin akses kamera ditolak. Silakan buka pengaturan browser dan izinkan akses kamera.';
-            } else if (err.name === 'NotFoundError') {
-                errorMsg += 'Kamera tidak ditemukan di perangkat Anda.';
-            } else if (err.name === 'NotReadableError') {
-                errorMsg += 'Kamera sudah digunakan oleh aplikasi lain.';
-            } else {
-                errorMsg += 'Silakan periksa koneksi kamera Anda.';
-            }
-            alert(errorMsg);
-        });
+    // Jika device support, gunakan constraints yang lebih spesifik
+    navigator.mediaDevices.enumerateDevices().then(devices => {
+        const hasBackCamera = devices.some(device => device.kind === 'videoinput' && device.label.includes('back'));
+        const hasFrontCamera = devices.some(device => device.kind === 'videoinput');
+        
+        // Untuk mobile, prioritaskan back camera jika ada, fallback ke front
+        constraints = {
+            video: {
+                facingMode: hasBackCamera ? { exact: 'environment' } : 'user',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        };
+        
+        return navigator.mediaDevices.getUserMedia(constraints);
+    }).catch(() => {
+        // Jika enumerateDevices gagal, gunakan constraints default
+        constraints = {
+            video: true,
+            audio: false
+        };
+        return navigator.mediaDevices.getUserMedia(constraints);
+    }).then(stream => {
+        console.log('✅ Kamera berhasil diakses (masuk)');
+        streamMasuk = stream;
+        video.srcObject = stream;
+        
+        // Set proper video element properties
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('autoplay', 'true');
+        video.setAttribute('muted', 'true');
+        
+        // Tunggu video siap dimainkan
+        video.onloadedmetadata = function() {
+            console.log('✅ Video metadata loaded');
+            video.play().catch(err => {
+                console.error('❌ Error playing video:', err);
+            });
+        };
+        
+        video.style.display = 'block';
+        placeholder.style.display = 'none';
+        document.getElementById('capture_masuk_btn').style.display = 'inline-block';
+        document.getElementById('stop_masuk_btn').style.display = 'inline-block';
+    })
+    .catch(err => {
+        console.error('❌ Error mengakses kamera:', err);
+        let errorMsg = 'Tidak dapat mengakses kamera. ';
+        if (err.name === 'NotAllowedError') {
+            errorMsg += 'Izin akses kamera ditolak. Silakan buka pengaturan browser dan izinkan akses kamera.';
+        } else if (err.name === 'NotFoundError') {
+            errorMsg += 'Kamera tidak ditemukan di perangkat Anda.';
+        } else if (err.name === 'NotReadableError') {
+            errorMsg += 'Kamera sudah digunakan oleh aplikasi lain.';
+        } else if (err.name === 'SecurityError') {
+            errorMsg += 'Kamera memerlukan HTTPS atau localhost.';
+        } else {
+            errorMsg += 'Silakan periksa koneksi kamera Anda. Error: ' + err.message;
+        }
+        alert(errorMsg);
+    });
 }
 
 function capturePhotoMasuk() {
@@ -583,9 +633,16 @@ function capturePhotoMasuk() {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     
-    // Mirror horizontal
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
+    // Check if using front camera (mirror) atau back camera (no mirror)
+    const settings = video.srcObject.getVideoTracks()[0].getSettings();
+    const isFrontCamera = settings.facingMode !== 'environment';
+    
+    if (isFrontCamera) {
+        // Mirror horizontal for front camera
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+    }
+    
     ctx.drawImage(video, 0, 0);
     
     canvas.toBlob(blob => {
@@ -620,48 +677,74 @@ function startCameraKeluar() {
     
     console.log('🎥 Meminta akses kamera untuk keluar...');
     
-    const constraints = {
-        video: {
-            facingMode: 'user',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-        },
+    // Gunakan object constraints untuk compatibility yang lebih baik
+    let constraints = {
+        video: true,
         audio: false
     };
     
-    navigator.mediaDevices.getUserMedia(constraints)
-        .then(stream => {
-            console.log('✅ Kamera berhasil diakses (keluar)');
-            streamKeluar = stream;
-            video.srcObject = stream;
-            
-            // Tunggu video siap dimainkan
-            video.onloadedmetadata = function() {
-                console.log('✅ Video metadata loaded');
-                video.play().catch(err => {
-                    console.error('❌ Error playing video:', err);
-                });
-            };
-            
-            video.style.display = 'block';
-            placeholder.style.display = 'none';
-            document.getElementById('capture_keluar_btn').style.display = 'inline-block';
-            document.getElementById('stop_keluar_btn').style.display = 'inline-block';
-        })
-        .catch(err => {
-            console.error('❌ Error mengakses kamera:', err);
-            let errorMsg = 'Tidak dapat mengakses kamera. ';
-            if (err.name === 'NotAllowedError') {
-                errorMsg += 'Izin akses kamera ditolak. Silakan buka pengaturan browser dan izinkan akses kamera.';
-            } else if (err.name === 'NotFoundError') {
-                errorMsg += 'Kamera tidak ditemukan di perangkat Anda.';
-            } else if (err.name === 'NotReadableError') {
-                errorMsg += 'Kamera sudah digunakan oleh aplikasi lain.';
-            } else {
-                errorMsg += 'Silakan periksa koneksi kamera Anda.';
-            }
-            alert(errorMsg);
-        });
+    // Jika device support, gunakan constraints yang lebih spesifik
+    navigator.mediaDevices.enumerateDevices().then(devices => {
+        const hasBackCamera = devices.some(device => device.kind === 'videoinput' && device.label.includes('back'));
+        const hasFrontCamera = devices.some(device => device.kind === 'videoinput');
+        
+        // Untuk mobile, prioritaskan back camera jika ada, fallback ke front
+        constraints = {
+            video: {
+                facingMode: hasBackCamera ? { exact: 'environment' } : 'user',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        };
+        
+        return navigator.mediaDevices.getUserMedia(constraints);
+    }).catch(() => {
+        // Jika enumerateDevices gagal, gunakan constraints default
+        constraints = {
+            video: true,
+            audio: false
+        };
+        return navigator.mediaDevices.getUserMedia(constraints);
+    }).then(stream => {
+        console.log('✅ Kamera berhasil diakses (keluar)');
+        streamKeluar = stream;
+        video.srcObject = stream;
+        
+        // Set proper video element properties
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('autoplay', 'true');
+        video.setAttribute('muted', 'true');
+        
+        // Tunggu video siap dimainkan
+        video.onloadedmetadata = function() {
+            console.log('✅ Video metadata loaded');
+            video.play().catch(err => {
+                console.error('❌ Error playing video:', err);
+            });
+        };
+        
+        video.style.display = 'block';
+        placeholder.style.display = 'none';
+        document.getElementById('capture_keluar_btn').style.display = 'inline-block';
+        document.getElementById('stop_keluar_btn').style.display = 'inline-block';
+    })
+    .catch(err => {
+        console.error('❌ Error mengakses kamera:', err);
+        let errorMsg = 'Tidak dapat mengakses kamera. ';
+        if (err.name === 'NotAllowedError') {
+            errorMsg += 'Izin akses kamera ditolak. Silakan buka pengaturan browser dan izinkan akses kamera.';
+        } else if (err.name === 'NotFoundError') {
+            errorMsg += 'Kamera tidak ditemukan di perangkat Anda.';
+        } else if (err.name === 'NotReadableError') {
+            errorMsg += 'Kamera sudah digunakan oleh aplikasi lain.';
+        } else if (err.name === 'SecurityError') {
+            errorMsg += 'Kamera memerlukan HTTPS atau localhost.';
+        } else {
+            errorMsg += 'Silakan periksa koneksi kamera Anda. Error: ' + err.message;
+        }
+        alert(errorMsg);
+    });
 }
 
 function capturePhotoKeluar() {
@@ -677,9 +760,16 @@ function capturePhotoKeluar() {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     
-    // Mirror horizontal
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
+    // Check if using front camera (mirror) atau back camera (no mirror)
+    const settings = video.srcObject.getVideoTracks()[0].getSettings();
+    const isFrontCamera = settings.facingMode !== 'environment';
+    
+    if (isFrontCamera) {
+        // Mirror horizontal for front camera
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+    }
+    
     ctx.drawImage(video, 0, 0);
     
     canvas.toBlob(blob => {
@@ -707,5 +797,109 @@ function stopCameraKeluar() {
     document.getElementById('capture_keluar_btn').style.display = 'none';
     document.getElementById('stop_keluar_btn').style.display = 'none';
 }
+
+// ============ SIGNATURE PAD FUNCTIONS ============
+
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+
+const canvas = document.getElementById('signatureCanvas');
+const ctx = canvas.getContext('2d');
+
+// Set canvas size for responsive design
+function resizeSignatureCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width - 20; // Account for padding
+    canvas.height = 200;
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+}
+
+// Handle both mouse and touch events
+function getEventCoordinates(e) {
+    if (e.touches) {
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: touch.clientX - rect.left,
+            y: touch.clientY - rect.top
+        };
+    } else {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    }
+}
+
+function startDrawing(e) {
+    isDrawing = true;
+    const coords = getEventCoordinates(e);
+    lastX = coords.x;
+    lastY = coords.y;
+    e.preventDefault();
+}
+
+function draw(e) {
+    if (!isDrawing) return;
+    
+    const coords = getEventCoordinates(e);
+    
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(coords.x, coords.y);
+    ctx.stroke();
+    
+    lastX = coords.x;
+    lastY = coords.y;
+    e.preventDefault();
+}
+
+function stopDrawing(e) {
+    isDrawing = false;
+    saveSignature();
+    e.preventDefault();
+}
+
+function saveSignature() {
+    const imageData = canvas.toDataURL('image/png');
+    document.getElementById('tanda_tangan').value = imageData;
+    console.log('✓ Tanda tangan tersimpan');
+}
+
+function clearSignature() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    document.getElementById('tanda_tangan').value = '';
+    console.log('✓ Tanda tangan dihapus');
+}
+
+// Mouse events
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', stopDrawing);
+canvas.addEventListener('mouseout', stopDrawing);
+
+// Touch events for mobile
+canvas.addEventListener('touchstart', startDrawing);
+canvas.addEventListener('touchmove', draw);
+canvas.addEventListener('touchend', stopDrawing);
+
+// Initialize canvas on load
+window.addEventListener('load', resizeSignatureCanvas);
+window.addEventListener('resize', resizeSignatureCanvas);
+
+// Validate form before submit
+document.querySelector('form').addEventListener('submit', function(e) {
+    const signatureValue = document.getElementById('tanda_tangan').value;
+    if (!signatureValue) {
+        e.preventDefault();
+        alert('Silakan tanda tangani form terlebih dahulu!');
+        return false;
+    }
+});
 </script>
 @endsection

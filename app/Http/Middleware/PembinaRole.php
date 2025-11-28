@@ -11,21 +11,25 @@ class PembinaRole
     /**
      * Handle an incoming request.
      * Ensure only pembina users can access pembina-specific routes.
-     * Add no-cache headers to prevent back button access.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || auth()->user()->role !== 'pembina') {
-            return redirect('/dashboard')
-                ->with('error', 'Anda tidak memiliki akses ke halaman ini');
+        $user = auth()->user();
+
+        // Verify user is authenticated and is pembina
+        if (! $user || $user->role !== 'pembina') {
+            if ($request->expectsJson()) {
+                return response()->json(
+                    ['message' => 'Ini bukan tempat anda'],
+                    Response::HTTP_FORBIDDEN
+                );
+            }
+
+            abort(403, 'Ini bukan tempat anda');
         }
 
-        $response = $next($request);
-
-        // Prevent caching and back button access
-        return $response
-            ->header('Cache-Control', 'no-cache, no-store, must-revalidate, private')
-            ->header('Pragma', 'no-cache')
-            ->header('Expires', '0');
+        return $next($request);
     }
 }

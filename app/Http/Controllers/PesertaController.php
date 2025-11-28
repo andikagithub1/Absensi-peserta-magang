@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Peserta;
+use App\Http\Requests\UpdatePasswordRequest;
 use App\Models\Pembina;
+use App\Models\Peserta;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,7 @@ class PesertaController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
+
         // Admin bisa lihat semua peserta
         if ($user->role === 'admin') {
             $pesertas = Peserta::with(['user', 'pembina'])->paginate(10);
@@ -20,7 +21,7 @@ class PesertaController extends Controller
         // Pembina hanya bisa lihat peserta mereka
         elseif ($user->role === 'pembina') {
             $pembina = $user->pembina;
-            if (!$pembina) {
+            if (! $pembina) {
                 return redirect()->back()->with('error', 'Data pembina tidak ditemukan');
             }
             $pesertas = $pembina->pesertas()->with('pembina')->paginate(10);
@@ -36,23 +37,24 @@ class PesertaController extends Controller
     public function create()
     {
         $user = auth()->user();
-        
+
         if ($user->role !== 'admin') {
             return redirect()->back()->with('error', 'Hanya admin yang bisa membuat peserta baru');
         }
-        
+
         $pembinas = Pembina::all();
+
         return view('peserta.create', compact('pembinas'));
     }
 
     public function store(Request $request)
     {
         $user = auth()->user();
-        
+
         if ($user->role !== 'admin') {
             return redirect()->back()->with('error', 'Hanya admin yang bisa membuat peserta baru');
         }
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
@@ -71,6 +73,7 @@ class PesertaController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
+            'plain_password' => $validated['password'],
             'role' => 'peserta',
         ]);
 
@@ -93,11 +96,11 @@ class PesertaController extends Controller
     {
         $peserta = Peserta::findOrFail($id);
         $user = auth()->user();
-        
+
         // Pembina hanya bisa edit peserta mereka
         if ($user->role === 'pembina') {
             $pembina = $user->pembina;
-            if (!$pembina || $peserta->pembina_id !== $pembina->id) {
+            if (! $pembina || $peserta->pembina_id !== $pembina->id) {
                 return redirect()->back()->with('error', 'Anda tidak bisa mengedit peserta ini');
             }
         }
@@ -105,8 +108,9 @@ class PesertaController extends Controller
         elseif ($user->role !== 'admin') {
             return redirect()->back()->with('error', 'Anda tidak memiliki akses');
         }
-        
+
         $pembinas = Pembina::all();
+
         return view('peserta.edit', compact('peserta', 'pembinas'));
     }
 
@@ -114,11 +118,11 @@ class PesertaController extends Controller
     {
         $peserta = Peserta::findOrFail($id);
         $user = auth()->user();
-        
+
         // Pembina hanya bisa update peserta mereka
         if ($user->role === 'pembina') {
             $pembina = $user->pembina;
-            if (!$pembina || $peserta->pembina_id !== $pembina->id) {
+            if (! $pembina || $peserta->pembina_id !== $pembina->id) {
                 return redirect()->back()->with('error', 'Anda tidak bisa mengupdate peserta ini');
             }
         }
@@ -126,7 +130,7 @@ class PesertaController extends Controller
         elseif ($user->role !== 'admin') {
             return redirect()->back()->with('error', 'Anda tidak memiliki akses');
         }
-        
+
         $validated = $request->validate([
             'pembina_id' => 'required|exists:pembinas,id',
             'nama_lengkap' => 'required|string',
@@ -146,13 +150,14 @@ class PesertaController extends Controller
     {
         $peserta = Peserta::findOrFail($id);
         $user = auth()->user();
-        
+
         if ($user->role !== 'admin') {
             return redirect()->back()->with('error', 'Hanya admin yang bisa menghapus peserta');
         }
-        
+
         $peserta->user()->delete();
         $peserta->delete();
+
         return redirect('/peserta')->with('success', 'Data peserta berhasil dihapus');
     }
 
@@ -160,6 +165,38 @@ class PesertaController extends Controller
     {
         $peserta = Peserta::findOrFail($id);
         $attendances = $peserta->attendances()->orderBy('tanggal', 'desc')->paginate(10);
+
         return view('peserta.show', compact('peserta', 'attendances'));
+    }
+
+    public function editPassword($id)
+    {
+        $peserta = Peserta::findOrFail($id);
+        $user = auth()->user();
+
+        // Only admin can edit peserta password
+        if ($user->role !== 'admin') {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses');
+        }
+
+        return view('peserta.edit-password', compact('peserta'));
+    }
+
+    public function updatePassword(UpdatePasswordRequest $request, $id)
+    {
+        $peserta = Peserta::findOrFail($id);
+        $user = auth()->user();
+
+        // Only admin can update peserta password
+        if ($user->role !== 'admin') {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses');
+        }
+
+        $peserta->user->update([
+            'password' => bcrypt($request->password),
+            'plain_password' => $request->password,
+        ]);
+
+        return redirect('/peserta')->with('success', 'Password peserta berhasil diperbarui');
     }
 }

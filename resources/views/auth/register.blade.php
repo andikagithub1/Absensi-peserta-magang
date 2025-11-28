@@ -499,6 +499,27 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <label for="pembina_id" class="form-label">
+                            <i class="fas fa-user-tie"></i> Pilih Pembina
+                        </label>
+                        <select 
+                            class="form-control @error('pembina_id') is-invalid @enderror" 
+                            id="pembina_id" 
+                            name="pembina_id"
+                        >
+                            <option value="">-- Pilih Pembina --</option>
+                            @foreach($pembinas as $pembina)
+                                <option value="{{ $pembina->id }}" {{ old('pembina_id') == $pembina->id ? 'selected' : '' }}>
+                                    {{ $pembina->nama_lengkap }} ({{ $pembina->jabatan }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('pembina_id')
+                            <small class="invalid-feedback d-block">{{ $message }}</small>
+                        @enderror
+                    </div>
                 </div>
 
                 <input type="hidden" name="role" id="role" value="peserta">

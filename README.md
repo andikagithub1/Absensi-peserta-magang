@@ -2,6 +2,235 @@
 
 > Sistem manajemen absensi terintegrasi untuk Program Kerja Lapangan dengan fitur foto bukti, lokasi GPS akurat, dan monitoring pembina.
 
+## 🏗️ Architecture Diagrams
+
+### 📊 Entity Relationship Diagram (ERD)
+
+```mermaid
+erDiagram
+    USERS ||--|| PEMBINAS : has
+    USERS ||--|| PESERTAS : has
+    PEMBINAS ||--o{ PESERTAS : supervises
+    PESERTAS ||--o{ ATTENDANCES : records
+
+    USERS {
+        bigint id PK
+        string name
+        string email UK
+        enum role "admin|pembina|peserta"
+        string password
+        string plain_password
+        longtext encrypted_password
+        timestamp email_verified_at
+        string remember_token
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PEMBINAS {
+        bigint id PK
+        bigint user_id FK
+        string nip UK
+        string nama_lengkap
+        string jabatan
+        string nomor_hp
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PESERTAS {
+        bigint id PK
+        bigint user_id FK
+        bigint pembina_id FK
+        string nisn UK
+        string nama_lengkap
+        string sekolah
+        string jurusan
+        date tanggal_mulai
+        date tanggal_selesai
+        string nomor_hp
+        decimal latitude_tempat_kerja
+        decimal longitude_tempat_kerja
+        int radius_toleransi
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ATTENDANCES {
+        bigint id PK
+        bigint peserta_id FK
+        date tanggal
+        time jam_masuk
+        time jam_keluar
+        varchar foto_masuk
+        varchar foto_keluar
+        decimal latitude_masuk
+        decimal longitude_masuk
+        decimal latitude_keluar
+        decimal longitude_keluar
+        enum status "hadir|izin|sakit|alfa"
+        text keterangan
+        longtext tanda_tangan
+        timestamp created_at
+        timestamp updated_at
+    }
+```
+
+### 🎯 UML Class Diagram
+
+```mermaid
+classDiagram
+    class User {
+        -bigint id
+        -string name
+        -string email
+        -enum role
+        -string password
+        -string plain_password
+        -longtext encrypted_password
+        +authenticate()
+        +hasRole()
+        +pembina()
+        +peserta()
+    }
+
+    class Pembina {
+        -bigint id
+        -bigint user_id
+        -string nip
+        -string nama_lengkap
+        -string jabatan
+        -string nomor_hp
+        +pesertas()
+        +user()
+    }
+
+    class Peserta {
+        -bigint id
+        -bigint user_id
+        -bigint pembina_id
+        -string nisn
+        -string nama_lengkap
+        -string sekolah
+        -string jurusan
+        -date tanggal_mulai
+        -date tanggal_selesai
+        -decimal latitude_tempat_kerja
+        -decimal longitude_tempat_kerja
+        -int radius_toleransi
+        +attendances()
+        +pembina()
+        +user()
+        +getStatusKehadiran()
+    }
+
+    class Attendance {
+        -bigint id
+        -bigint peserta_id
+        -date tanggal
+        -time jam_masuk
+        -time jam_keluar
+        -varchar foto_masuk
+        -varchar foto_keluar
+        -decimal latitude_masuk
+        -decimal longitude_masuk
+        -decimal latitude_keluar
+        -decimal longitude_keluar
+        -enum status
+        -text keterangan
+        -longtext tanda_tangan
+        +peserta()
+        +isInRadius()
+        +calculateDistance()
+    }
+
+    class UserController {
+        +authenticate()
+        +logout()
+    }
+
+    class PembinaController {
+        +index()
+        +create()
+        +store()
+        +edit()
+        +update()
+        +destroy()
+        +show()
+    }
+
+    class PesertaController {
+        +index()
+        +create()
+        +store()
+        +edit()
+        +update()
+        +destroy()
+    }
+
+    class AttendanceController {
+        +index()
+        +create()
+        +store()
+        +edit()
+        +update()
+        +destroy()
+        +show()
+    }
+
+    User "1" -- "1" Pembina : has
+    User "1" -- "1" Peserta : has
+    Pembina "1" -- "*" Peserta : supervises
+    Peserta "1" -- "*" Attendance : records
+
+    UserController --> User : manages
+    PembinaController --> Pembina : manages
+    PesertaController --> Peserta : manages
+    AttendanceController --> Attendance : manages
+```
+
+### 🔄 System Flow Diagram
+
+```mermaid
+graph TD
+    A[User Access] --> B{Check Role}
+    B -->|Admin| C[Admin Dashboard]
+    B -->|Pembina| D[Pembina Dashboard]
+    B -->|Peserta| E[Peserta Dashboard]
+    
+    C --> C1[Manage Pembina]
+    C --> C2[Manage Peserta]
+    C --> C3[View Attendance]
+    
+    D --> D1[Monitor Peserta]
+    D --> D2[View Attendance]
+    
+    E --> E1[Create Attendance]
+    E1 --> E2[Upload Foto]
+    E2 --> E3[Get GPS Location]
+    E3 --> E4[Draw Signature]
+    E4 --> E5[Submit]
+    
+    E5 --> F[Save to Database]
+    F --> G[Notify Pembina]
+    G --> D2
+```
+
+### 🛡️ Security Architecture
+
+```mermaid
+graph LR
+    A[Request] --> B[CSRF Token]
+    B --> C[Authentication]
+    C --> D{Authorization}
+    D -->|Allowed| E[Execute Action]
+    D -->|Denied| F[403 Forbidden]
+    E --> G[Validate Input]
+    G --> H[Process]
+    H --> I[Response]
+    F --> I
+```
+
 ## 🌟 Fitur Utama
 
 - 📸 **Upload Foto Bukti** - Peserta dapat upload foto saat masuk dan keluar
@@ -11,6 +240,7 @@
 - ✅ **CRUD Lengkap** - Manajemen data pembina, peserta, dan absensi
 - 🔐 **Role-Based Access** - Sistem security dengan 3 role berbeda
 - 🎨 **UI/UX Responsive** - Interface yang user-friendly dan mobile-friendly
+- ✍️ **Digital Signature** - Tanda tangan digital untuk verifikasi identitas peserta
 
 ## 📚 Dokumentasi
 
