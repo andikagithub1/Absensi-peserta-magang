@@ -267,7 +267,12 @@ EXIT;
 
 ### 2️⃣ Configure Environment
 Edit file `.env`:
-```env
+
+``` Ubah File Environment
+cp .env.example .env
+ ```
+
+```env    
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
