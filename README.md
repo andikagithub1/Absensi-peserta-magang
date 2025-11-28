@@ -260,7 +260,6 @@ Dokumentasi lengkap tersedia dalam beberapa file:
 ### 1️⃣ Setup Database
 ```bash
 # Buat database MySQL
-mysql -u root -p
 CREATE DATABASE absensi_pkl;
 EXIT;
 ```
@@ -304,6 +303,20 @@ php artisan serve
 ```
 
 **Aplikasi ready di**: http://localhost:8000
+
+## Login Admin
+
+### Gmail
+
+```
+admin@absensi-pkl.local
+```
+
+### Password
+
+```
+Admin123456
+```
 
 ## 👥 User Roles
 
