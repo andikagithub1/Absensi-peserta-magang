@@ -56,7 +56,16 @@
                         
                         <div class="mb-4">
                             <h6 class="text-muted mb-3"><i class="fas fa-briefcase"></i> Data Pembina</h6>
-                            
+
+                            <div class="mb-3">
+                                <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
+                                <input type="text" class="form-control @error('nama_lengkap') is-invalid @enderror"
+                                       id="nama_lengkap" name="nama_lengkap" value="{{ old('nama_lengkap') }}" placeholder="Nama lengkap pembina" required>
+                                @error('nama_lengkap')
+                                    <small class="invalid-feedback d-block">{{ $message }}</small>
+                                @enderror
+                            </div>
+
                             <div class="row">
                                 <div class="col-12 col-sm-6 mb-3">
                                     <label for="nip" class="form-label">NIP</label>
