@@ -139,11 +139,10 @@ graph TD
     
     E --> E1[Create Attendance]
     E1 --> E2[Upload Foto]
-    E3 --> E4[Submit]
+  
     
-    E5 --> F[Save to Database]
-    F --> G[Notify Pembina]
-    G --> D2
+    
+  
 ```
 
 ### 🛡️ Security Architecture
