@@ -6,75 +6,7 @@
 
 ### 📊 Entity Relationship Diagram (ERD)
 
-```mermaid
-erDiagram
-    USERS ||--|| PEMBINAS : has
-    USERS ||--|| PESERTAS : has
-    PEMBINAS ||--o{ PESERTAS : supervises
-    PESERTAS ||--o{ ATTENDANCES : records
 
-    USERS {
-        bigint id PK
-        string name
-        string email UK
-        enum role "admin|pembina|peserta"
-        string password
-        string plain_password
-        longtext encrypted_password
-        timestamp email_verified_at
-        string remember_token
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    PEMBINAS {
-        bigint id PK
-        bigint user_id FK
-        string nip UK
-        string nama_lengkap
-        string jabatan
-        string nomor_hp
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    PESERTAS {
-        bigint id PK
-        bigint user_id FK
-        bigint pembina_id FK
-        string nisn UK
-        string nama_lengkap
-        string sekolah
-        string jurusan
-        date tanggal_mulai
-        date tanggal_selesai
-        string nomor_hp
-        decimal latitude_tempat_kerja
-        decimal longitude_tempat_kerja
-        int radius_toleransi
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    ATTENDANCES {
-        bigint id PK
-        bigint peserta_id FK
-        date tanggal
-        time jam_masuk
-        time jam_keluar
-        varchar foto_masuk
-        varchar foto_keluar
-        decimal latitude_masuk
-        decimal longitude_masuk
-        decimal latitude_keluar
-        decimal longitude_keluar
-        enum status "hadir|izin|sakit|alfa"
-        text keterangan
-        longtext tanda_tangan
-        timestamp created_at
-        timestamp updated_at
-    }
-```
 
 ### 🎯 UML Class Diagram
 
@@ -189,7 +121,7 @@ classDiagram
     AttendanceController --> Attendance : manages
 ```
 
-### 🔄 System Flow Diagram
+### 🔄 ERD
 
 ```mermaid
 graph TD
@@ -207,9 +139,7 @@ graph TD
     
     E --> E1[Create Attendance]
     E1 --> E2[Upload Foto]
-    E2 --> E3[Get GPS Location]
-    E3 --> E4[Draw Signature]
-    E4 --> E5[Submit]
+    E3 --> E4[Submit]
     
     E5 --> F[Save to Database]
     F --> G[Notify Pembina]
