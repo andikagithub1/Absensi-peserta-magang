@@ -45,11 +45,6 @@ classDiagram
         -string nama_lengkap
         -string sekolah
         -string jurusan
-        -date tanggal_mulai
-        -date tanggal_selesai
-        -decimal latitude_tempat_kerja
-        -decimal longitude_tempat_kerja
-        -int radius_toleransi
         +attendances()
         +pembina()
         +user()
@@ -64,16 +59,10 @@ classDiagram
         -time jam_keluar
         -varchar foto_masuk
         -varchar foto_keluar
-        -decimal latitude_masuk
-        -decimal longitude_masuk
-        -decimal latitude_keluar
-        -decimal longitude_keluar
         -enum status
         -text keterangan
         -longtext tanda_tangan
         +peserta()
-        +isInRadius()
-        +calculateDistance()
     }
 
     class UserController {
