@@ -9,105 +9,81 @@
 
 
 ### 🎯 UML Class Diagram
-
 ```mermaid
-classDiagram
-    class User {
-        -bigint id
-        -string name
-        -string email
-        -enum role
-        -string password
-        -string plain_password
-        -longtext encrypted_password
-        +authenticate()
-        +hasRole()
-        +pembina()
-        +peserta()
-    }
-
-    class Pembina {
-        -bigint id
-        -bigint user_id
-        -string nip
-        -string nama_lengkap
-        -string jabatan
-        -string nomor_hp
-        +pesertas()
-        +user()
-    }
-
-    class Peserta {
-        -bigint id
-        -bigint user_id
-        -bigint pembina_id
-        -string nisn
-        -string nama_lengkap
-        -string sekolah
-        -string jurusan
-        +attendances()
-        +pembina()
-        +user()
-        +getStatusKehadiran()
-    }
-
-    class Attendance {
-        -bigint id
-        -bigint peserta_id
-        -date tanggal
-        -time jam_masuk
-        -time jam_keluar
-        -varchar foto_masuk
-        -varchar foto_keluar
-        -enum status
-        -text keterangan
-        -longtext tanda_tangan
-        +peserta()
-    }
-
-    class UserController {
-        +authenticate()
-        +logout()
-    }
-
-    class PembinaController {
-        +index()
-        +create()
-        +store()
-        +edit()
-        +update()
-        +destroy()
-        +show()
-    }
-
-    class PesertaController {
-        +index()
-        +create()
-        +store()
-        +edit()
-        +update()
-        +destroy()
-    }
-
-    class AttendanceController {
-        +index()
-        +create()
-        +store()
-        +edit()
-        +update()
-        +destroy()
-        +show()
-    }
-
-    User "1" -- "1" Pembina : has
-    User "1" -- "1" Peserta : has
-    Pembina "1" -- "*" Peserta : supervises
-    Peserta "1" -- "*" Attendance : records
-
-    UserController --> User : manages
-    PembinaController --> Pembina : manages
-    PesertaController --> Peserta : manages
-    AttendanceController --> Attendance : manages
+flowchart LR
+    classDef actor fill:#eef2ff,stroke:#6366f1,color:#312e81,stroke-width:2px;
+    classDef usecase fill:#fff7ed,stroke:#fb923c,color:#9a3412,stroke-width:1.5px;
+    
+    ADM((Admin)):::actor
+    PMB((Pembina)):::actor
+    PST((Peserta)):::actor
+    
+    subgraph UC[Use Cases]
+        direction TB
+        ucAuthLogin[(Login/Autentikasi)]:::usecase
+        ucAuthLogout[(Logout)]:::usecase
+        
+        ucPembinaManage[(Kelola data pembina)]:::usecase
+        ucPembinaList[(Lihat daftar pembina)]:::usecase
+        ucPembinaCreate[(Tambah pembina baru)]:::usecase
+        ucPembinaEdit[(Edit data pembina)]:::usecase
+        ucPembinaDelete[(Hapus pembina)]:::usecase
+        ucPembinaDetail[(Lihat detail pembina)]:::usecase
+        
+        ucPesertaManage[(Kelola data peserta)]:::usecase
+        ucPesertaList[(Lihat daftar peserta)]:::usecase
+        ucPesertaCreate[(Tambah peserta baru)]:::usecase
+        ucPesertaEdit[(Edit data peserta)]:::usecase
+        ucPesertaDelete[(Hapus peserta)]:::usecase
+        ucPesertaStatus[(Lihat status kehadiran peserta)]:::usecase
+        
+        ucAttendanceManage[(Kelola absensi)]:::usecase
+        ucAttendanceList[(Lihat daftar absensi)]:::usecase
+        ucAttendanceIn[(Catat absensi masuk)]:::usecase
+        ucAttendanceOut[(Catat absensi keluar)]:::usecase
+        ucAttendanceEdit[(Edit absensi)]:::usecase
+        ucAttendanceDelete[(Hapus absensi)]:::usecase
+        ucAttendanceDetail[(Lihat detail absensi)]:::usecase
+        ucPhotoIn[(Upload foto masuk)]:::usecase
+        ucPhotoOut[(Upload foto keluar)]:::usecase
+        ucSignature[(Tanda tangan digital)]:::usecase
+    end
+    
+    ADM --- ucAuthLogin
+    ADM --- ucAuthLogout
+    ADM --- ucPembinaManage
+    ADM --- ucPembinaList
+    ADM --- ucPembinaCreate
+    ADM --- ucPembinaEdit
+    ADM --- ucPembinaDelete
+    ADM --- ucPembinaDetail
+    ADM --- ucPesertaManage
+    ADM --- ucPesertaList
+    ADM --- ucPesertaCreate
+    ADM --- ucPesertaEdit
+    ADM --- ucPesertaDelete
+    ADM --- ucAttendanceManage
+    ADM --- ucAttendanceList
+    ADM --- ucAttendanceEdit
+    ADM --- ucAttendanceDelete
+    ADM --- ucAttendanceDetail
+    
+    PMB --- ucAuthLogin
+    PMB --- ucAuthLogout
+    PMB --- ucPesertaList
+    PMB --- ucPesertaStatus
+    PMB --- ucAttendanceList
+    PMB --- ucAttendanceDetail
+    
+    PST --- ucAuthLogin
+    PST --- ucAuthLogout
+    PST --- ucAttendanceIn
+    PST --- ucAttendanceOut
+    PST --- ucAttendanceList
+    PST --- ucAttendanceDetail
+    PST --- ucPhotoIn
+    PST --- ucPhotoOut
+    PST --- ucSignature
 ```
 
 ### 🔄 ERD
