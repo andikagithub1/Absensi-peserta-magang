@@ -11,9 +11,9 @@
 ### 🎯 UML Class Diagram
 ```mermaid
 flowchart LR
-    classDef actor fill:#eef2ff,stroke:#6366f1,color:#312e81,stroke-width:2px;
-    classDef usecase fill:#fff7ed,stroke:#fb923c,color:#9a3412,stroke-width:1.5px;
-    
+ classDef actor fill:#f3e8ff,stroke:#a855f7,color:#581c87,stroke-width:2px;
+classDef usecase fill:#fce7f3,stroke:#ec4899,color:#831843,stroke-width:1.5px;
+
     ADM((Admin)):::actor
     PMB((Pembina)):::actor
     PST((Peserta)):::actor
