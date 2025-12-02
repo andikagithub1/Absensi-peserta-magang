@@ -96,16 +96,57 @@ graph TD
     B -->|Peserta| E[Peserta Dashboard]
     
     C --> C1[Manage Pembina]
+    C1 --> C1a[Create Pembina]
+    C1 --> C1b[Edit Pembina]
+    C1 --> C1c[Delete Pembina]
+    C1 --> C1d[View Pembina List]
+    C1 --> C1e[View Pembina Detail]
+    
     C --> C2[Manage Peserta]
-    C --> C3[View Attendance]
+    C2 --> C2a[Create Peserta]
+    C2 --> C2b[Edit Peserta]
+    C2 --> C2c[Delete Peserta]
+    C2 --> C2d[Assign Peserta to Pembina]
+    C2 --> C2e[View Peserta List]
+    C2 --> C2f[View Peserta Status]
+    
+    C --> C3[Manage Attendance]
+    C3 --> C3a[View Attendance List]
+    C3 --> C3b[Edit Attendance]
+    C3 --> C3c[Delete Attendance]
+    C3 --> C3d[View Attendance Detail]
+    C3 --> C3e[Set Attendance Status]
+    C3 --> C3f[Generate Report]
     
     D --> D1[Monitor Peserta]
+    D1 --> D1a[View Peserta Binaan]
+    D1 --> D1b[View Peserta Status]
+    
     D --> D2[View Attendance]
+    D2 --> D2a[View Attendance List]
+    D2 --> D2b[View Attendance Detail]
+    D2 --> D2c[Generate Report]
     
     E --> E1[Create Attendance]
-    E1 --> E2[Upload Foto]
-  
+    E1 --> E1a[Check In]
+    E1 --> E1b[Check Out]
     
+    E1a --> E2[Upload Foto Masuk]
+    E1a --> E3[Digital Signature]
+    E1a --> E4[Input Keterangan]
+    
+    E1b --> E5[Upload Foto Keluar]
+    E1b --> E6[Digital Signature]
+    
+    E --> E7[View My Attendance]
+    E7 --> E7a[View Attendance List]
+    E7 --> E7b[View Attendance Detail]
+    
+    style A fill:#e1f5ff
+    style B fill:#fff9c4
+    style C fill:#c8e6c9
+    style D fill:#b3e5fc
+    style E fill:#ffccbc
     
   
 ```
